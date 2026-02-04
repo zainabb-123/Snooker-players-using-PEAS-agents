@@ -1,0 +1,1171 @@
+class SockerAgent:
+    """
+    A class representing a Socker Agent in the game environment.
+    This agent encapsulates properties, internal state, and methods for interaction.
+    """
+    def __init__(self, team: str, player_id: int):
+        """
+        Initializes a new SockerAgent instance.
+
+        Args:
+            team (str): The team the agent belongs to (e.g., 'blue' or 'red').
+            player_id (int): A unique identifier for the player within their team.
+        """
+        self.team = team
+        self.player_id = player_id
+
+    def __repr__(self):
+        return f"SockerAgent(team='{self.team}', player_id={self.player_id})"
+
+print("SockerAgent class defined.")
+import math
+
+class Ball:
+    """
+    Represents the Socker ball with its position and velocity.
+    """
+    def __init__(self, x: float, y: float, vx: float = 0.0, vy: float = 0.0):
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+    def __repr__(self):
+        return f"Ball(x={self.x:.2f}, y={self.y:.2f}, vx={self.vx:.2f}, vy={self.vy:.2f})"
+
+class Player:
+    """
+    Represents a player in the Socker game.
+    """
+    def __init__(self, x: float, y: float, orientation: float, team: str, stamina: float):
+        if not (-math.pi <= orientation <= math.pi):
+            raise ValueError("Orientation must be in radians between -pi and pi.")
+        if not (0.0 <= stamina <= 1.0):
+            raise ValueError("Stamina must be between 0.0 and 1.0.")
+
+        self.x = x
+        self.y = y
+        self.orientation = orientation  # in radians
+        self.team = team
+        self.stamina = stamina
+
+    def __repr__(self):
+        return (
+            f"Player(x={self.x:.2f}, y={self.y:.2f}, orientation={self.orientation:.2f}, "
+            f"team='{self.team}', stamina={self.stamina:.2f})"
+        )
+
+class Field:
+    """
+    Represents the Socker game field, including boundaries and goals.
+    """
+    def __init__(
+        self, width: float, height: float, goal_width: float, goal_depth: float
+    ):
+        if not (width > 0 and height > 0 and goal_width > 0 and goal_depth > 0):
+            raise ValueError("All dimensions must be positive.")
+
+        self.width = width
+        self.height = height
+        self.goal_width = goal_width
+        self.goal_depth = goal_depth
+
+        # Define goal positions (simplified for now, can be more complex if needed)
+        # Assuming goals are centered on the left and right edges
+        self.goal_left = {
+            "x_min": -goal_depth,
+            "x_max": 0,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+        self.goal_right = {
+            "x_min": width,
+            "x_max": width + goal_depth,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+
+    def __repr__(self):
+        return (
+            f"Field(width={self.width}, height={self.height}, "
+            f"goal_width={self.goal_width}, goal_depth={self.goal_depth})"
+        )
+
+print("Ball, Player, and Field classes defined.")
+import math
+
+# Re-define Ball, Player, and Field classes as they are dependencies
+class Ball:
+    """
+    Represents the Socker ball with its position and velocity.
+    """
+    def __init__(self, x: float, y: float, vx: float = 0.0, vy: float = 0.0):
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+    def __repr__(self):
+        return f"Ball(x={self.x:.2f}, y={self.y:.2f}, vx={self.vx:.2f}, vy={self.vy:.2f})"
+
+class Player:
+    """
+    Represents a player in the Socker game.
+    """
+    def __init__(self, x: float, y: float, orientation: float, team: str, stamina: float, player_id: int):
+        if not (-math.pi <= orientation <= math.pi):
+            raise ValueError("Orientation must be in radians between -pi and pi.")
+        if not (0.0 <= stamina <= 1.0):
+            raise ValueError("Stamina must be between 0.0 and 1.0.")
+
+        self.x = x
+        self.y = y
+        self.orientation = orientation  # in radians
+        self.team = team
+        self.stamina = stamina
+        self.player_id = player_id # Added player_id to Player class for identification
+
+    def __repr__(self):
+        return (
+            f"Player(id={self.player_id}, team='{self.team}', x={self.x:.2f}, y={self.y:.2f}, "
+            f"orientation={self.orientation:.2f}, stamina={self.stamina:.2f})"
+        )
+
+class Field:
+    """
+    Represents the Socker game field, including boundaries and goals.
+    """
+    def __init__(
+        self, width: float, height: float, goal_width: float, goal_depth: float
+    ):
+        if not (width > 0 and height > 0 and goal_width > 0 and goal_depth > 0):
+            raise ValueError("All dimensions must be positive.")
+
+        self.width = width
+        self.height = height
+        self.goal_width = goal_width
+        self.goal_depth = goal_depth
+
+        self.goal_left = {
+            "x_min": -goal_depth,
+            "x_max": 0,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+        self.goal_right = {
+            "x_min": width,
+            "x_max": width + goal_depth,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+
+    def __repr__(self):
+        return (
+            f"Field(width={self.width}, height={self.height}, "
+            f"goal_width={self.goal_width}, goal_depth={self.goal_depth})"
+        )
+
+# Update the SockerAgent class with the new perceive method
+class SockerAgent:
+    """
+    A class representing a Socker Agent in the game environment.
+    This agent encapsulates properties, internal state, and methods for interaction.
+    """
+    def __init__(self, team: str, player_id: int):
+        """
+        Initializes a new SockerAgent instance.
+
+        Args:
+            team (str): The team the agent belongs to (e.g., 'blue' or 'red').
+            player_id (int): A unique identifier for the player within their team.
+        """
+        self.team = team
+        self.player_id = player_id
+        self.perceived_state = {} # To store the latest perceived state
+
+    def __repr__(self):
+        return f"SockerAgent(team='{self.team}', player_id={self.player_id})"
+
+    def perceive(self, ball: Ball, players: list[Player], field: Field) -> dict:
+        """
+        Simulates the agent's sensors, perceiving the current game environment state.
+
+        Args:
+            ball (Ball): The current state of the ball.
+            players (list[Player]): A list of all players in the game.
+            field (Field): The game field's properties.
+
+        Returns:
+            dict: A dictionary containing all perceived information.
+        """
+        self_player_info = None
+        teammates_info = []
+        opponents_info = []
+
+        for player in players:
+            if player.team == self.team and player.player_id == self.player_id:
+                self_player_info = {
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                }
+            elif player.team == self.team:
+                teammates_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+            else:
+                opponents_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+
+        self.perceived_state = {
+            'ball': {
+                'x': ball.x,
+                'y': ball.y,
+                'vx': ball.vx,
+                'vy': ball.vy
+            },
+            'self_player': self_player_info,
+            'teammates': teammates_info,
+            'opponents': opponents_info,
+            'field': {
+                'width': field.width,
+                'height': field.height,
+                'goal_left': field.goal_left,
+                'goal_right': field.goal_right
+            }
+        }
+        return self.perceived_state
+
+print("SockerAgent class updated with perceive method.")
+
+# Example usage to verify
+# field = Field(width=100, height=60, goal_width=10, goal_depth=5)
+# ball = Ball(x=50, y=30, vx=1, vy=0.5)
+# player1 = Player(x=10, y=20, orientation=0.5, team='blue', stamina=0.9, player_id=1)
+# player2 = Player(x=15, y=25, orientation=1.0, team='blue', stamina=0.8, player_id=2)
+# player3 = Player(x=90, y=40, orientation=-0.5, team='red', stamina=0.7, player_id=1)
+# players_list = [player1, player2, player3]
+
+# agent = SockerAgent(team='blue', player_id=1)
+# perceived_info = agent.perceive(ball, players_list, field)
+# print("\nPerceived Information:")
+# for key, value in perceived_info.items():
+#    print(f"{key}: {value}")
+import math
+
+# Re-define Ball, Player, and Field classes as they are dependencies
+class Ball:
+    """
+    Represents the Socker ball with its position and velocity.
+    """
+    def __init__(self, x: float, y: float, vx: float = 0.0, vy: float = 0.0):
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+    def __repr__(self):
+        return f"Ball(x={self.x:.2f}, y={self.y:.2f}, vx={self.vx:.2f}, vy={self.vy:.2f})"
+
+class Player:
+    """
+    Represents a player in the Socker game.
+    """
+    def __init__(self, x: float, y: float, orientation: float, team: str, stamina: float, player_id: int):
+        if not (-math.pi <= orientation <= math.pi):
+            raise ValueError("Orientation must be in radians between -pi and pi.")
+        if not (0.0 <= stamina <= 1.0):
+            raise ValueError("Stamina must be between 0.0 and 1.0.")
+
+        self.x = x
+        self.y = y
+        self.orientation = orientation  # in radians
+        self.team = team
+        self.stamina = stamina
+        self.player_id = player_id # Added player_id to Player class for identification
+
+    def __repr__(self):
+        return (
+            f"Player(id={self.player_id}, team='{self.team}', x={self.x:.2f}, y={self.y:.2f}, "
+            f"orientation={self.orientation:.2f}, stamina={self.stamina:.2f})"
+        )
+
+class Field:
+    """
+    Represents the Socker game field, including boundaries and goals.
+    """
+    def __init__(
+        self, width: float, height: float, goal_width: float, goal_depth: float
+    ):
+        if not (width > 0 and height > 0 and goal_width > 0 and goal_depth > 0):
+            raise ValueError("All dimensions must be positive.")
+
+        self.width = width
+        self.height = height
+        self.goal_width = goal_width
+        self.goal_depth = goal_depth
+
+        self.goal_left = {
+            "x_min": -goal_depth,
+            "x_max": 0,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+        self.goal_right = {
+            "x_min": width,
+            "x_max": width + goal_depth,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+
+    def __repr__(self):
+        return (
+            f"Field(width={self.width}, height={self.height}, "
+            f"goal_width={self.goal_width}, goal_depth={self.goal_depth})"
+        )
+
+# Update the SockerAgent class with the new decide_action method
+class SockerAgent:
+    """
+    A class representing a Socker Agent in the game environment.
+    This agent encapsulates properties, internal state, and methods for interaction.
+    """
+    def __init__(self, team: str, player_id: int):
+        """
+        Initializes a new SockerAgent instance.
+
+        Args:
+            team (str): The team the agent belongs to (e.g., 'blue' or 'red').
+            player_id (int): A unique identifier for the player within their team.
+        """
+        self.team = team
+        self.player_id = player_id
+        self.perceived_state = {} # To store the latest perceived state
+
+    def __repr__(self):
+        return f"SockerAgent(team='{self.team}', player_id={self.player_id})"
+
+    def perceive(self, ball: Ball, players: list[Player], field: Field) -> dict:
+        """
+        Simulates the agent's sensors, perceiving the current game environment state.
+
+        Args:
+            ball (Ball): The current state of the ball.
+            players (list[Player]): A list of all players in the game.
+            field (Field): The game field's properties.
+
+        Returns:
+            dict: A dictionary containing all perceived information.
+        """
+        self_player_info = None
+        teammates_info = []
+        opponents_info = []
+
+        for player in players:
+            if player.team == self.team and player.player_id == self.player_id:
+                self_player_info = {
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                }
+            elif player.team == self.team:
+                teammates_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+            else:
+                opponents_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+
+        self.perceived_state = {
+            'ball': {
+                'x': ball.x,
+                'y': ball.y,
+                'vx': ball.vx,
+                'vy': ball.y
+            },
+            'self_player': self_player_info,
+            'teammates': teammates_info,
+            'opponents': opponents_info,
+            'field': {
+                'width': field.width,
+                'height': field.height,
+                'goal_left': field.goal_left,
+                'goal_right': field.goal_right
+            }
+        }
+        return self.perceived_state
+
+    def decide_action(self) -> dict:
+        """
+        Processes the perceived state and decides on an action based on simple rules.
+
+        Returns:
+            dict: A dictionary representing the chosen action and its parameters.
+        """
+        if not self.perceived_state:
+            return {'action_type': 'idle', 'reason': 'No perceived state'}
+
+        ball_info = self.perceived_state['ball']
+        self_info = self.perceived_state['self_player']
+        teammates = self.perceived_state['teammates']
+        opponents = self.perceived_state['opponents']
+        field_info = self.perceived_state['field']
+
+        # Helper function to calculate distance
+        def distance(p1_x, p1_y, p2_x, p2_y):
+            return math.sqrt((p1_x - p2_x)**2 + (p1_y - p2_y)**2)
+
+        # 1. Prioritize Ball: Is this agent the closest player to the ball?
+        self_ball_dist = distance(self_info['x'], self_info['y'], ball_info['x'], ball_info['y'])
+
+        is_closest_to_ball = True
+        for player in teammates + opponents:
+            if player['id'] == self.player_id and player['team'] == self.team: # Skip self
+                continue
+            player_ball_dist = distance(player['x'], player['y'], ball_info['x'], ball_info['y'])
+            if player_ball_dist < self_ball_dist:
+                is_closest_to_ball = False
+                break
+
+        if is_closest_to_ball:
+            # Move to kick it towards the opponent's goal or pass
+            # For simplicity, let's assume always try to kick towards goal for now
+            # Assuming opponent's goal is on the right for 'blue' team, left for 'red'
+            target_goal_x = field_info['width'] if self.team == 'blue' else 0
+            target_goal_y = field_info['height'] / 2
+
+            # Calculate direction to target goal
+            dx = target_goal_x - self_info['x']
+            dy = target_goal_y - self_info['y']
+            direction_to_goal = math.atan2(dy, dx)
+
+            # If very close to ball, try to kick. Otherwise, move towards ball.
+            if self_ball_dist < 1.5: # Arbitrary small distance for kicking range
+                return {'action_type': 'kick', 'power': 0.8, 'direction': direction_to_goal, 'reason': 'Closest to ball, kicking towards goal'}
+            else:
+                # Move towards the ball
+                return {'action_type': 'move', 'target_x': ball_info['x'], 'target_y': ball_info['y'], 'reason': 'Closest to ball, moving to possess'}
+        else:
+            # Not closest to ball, consider defensive or offensive positioning
+            has_ball_possession = False
+            # Simplified check: if any teammate is close to the ball
+            for player in teammates:
+                if distance(player['x'], player['y'], ball_info['x'], ball_info['y']) < 2.0: # Arbitrary possession range
+                    has_ball_possession = True
+                    break
+            # Check if self has ball possession
+            if distance(self_info['x'], self_info['y'], ball_info['x'], ball_info['y']) < 2.0: # Arbitrary possession range
+                has_ball_possession = True
+
+            if not has_ball_possession: # Defensive Positioning (or chasing opponents with ball)
+                # Move towards own goal area or intercept opponent with ball
+                own_goal_center_x = 0 if self.team == 'blue' else field_info['width']
+                own_goal_center_y = field_info['height'] / 2
+
+                # Simple defensive position: move towards own goal center
+                return {'action_type': 'move', 'target_x': own_goal_center_x + (5 if self.team == 'blue' else -5), 'target_y': own_goal_center_y, 'reason': 'Defensive positioning'}
+            else: # Offensive Positioning (team has possession, but not this agent)
+                # Move towards opponent's goal or support teammate with ball
+                opponent_goal_center_x = field_info['width'] if self.team == 'blue' else 0
+                opponent_goal_center_y = field_info['height'] / 2
+
+                # Simple offensive position: move towards opponent's goal, but not too close yet
+                return {'action_type': 'move', 'target_x': opponent_goal_center_x - (10 if self.team == 'blue' else -10), 'target_y': opponent_goal_center_y, 'reason': 'Offensive positioning, supporting attack'}
+
+
+print("SockerAgent class updated with decide_action method.")
+
+# Example usage to verify
+# field = Field(width=100, height=60, goal_width=10, goal_depth=5)
+# ball = Ball(x=50, y=30, vx=1, vy=0.5)
+# player1 = Player(x=48, y=30, orientation=0.5, team='blue', stamina=0.9, player_id=1) # Closest to ball
+# player2 = Player(x=15, y=25, orientation=1.0, team='blue', stamina=0.8, player_id=2)
+# player3 = Player(x=90, y=40, orientation=-0.5, team='red', stamina=0.7, player_id=1)
+# players_list = [player1, player2, player3]
+
+# agent = SockerAgent(team='blue', player_id=1)
+# agent.perceive(ball, players_list, field)
+# action = agent.decide_action()
+# print("\nAgent 1 (blue) action:", action)
+
+# agent2 = SockerAgent(team='blue', player_id=2)
+# agent2.perceive(ball, players_list, field)
+# action2 = agent2.decide_action()
+# print("Agent 2 (blue) action:", action2)
+
+# agent3 = SockerAgent(team='red', player_id=1)
+# agent3.perceive(ball, players_list, field)
+# action3 = agent3.decide_action()
+# print("Agent 3 (red) action:", action3)
+import math
+
+# Re-define Ball, Player, and Field classes as they are dependencies
+class Ball:
+    """
+    Represents the Socker ball with its position and velocity.
+    """
+    def __init__(self, x: float, y: float, vx: float = 0.0, vy: float = 0.0):
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+    def __repr__(self):
+        return f"Ball(x={self.x:.2f}, y={self.y:.2f}, vx={self.vx:.2f}, vy={self.vy:.2f})"
+
+class Player:
+    """
+    Represents a player in the Socker game.
+    """
+    def __init__(self, x: float, y: float, orientation: float, team: str, stamina: float, player_id: int):
+        if not (-math.pi <= orientation <= math.pi):
+            raise ValueError("Orientation must be in radians between -pi and pi.")
+        if not (0.0 <= stamina <= 1.0):
+            raise ValueError("Stamina must be between 0.0 and 1.0.")
+
+        self.x = x
+        self.y = y
+        self.orientation = orientation  # in radians
+        self.team = team
+        self.stamina = stamina
+        self.player_id = player_id # Added player_id to Player class for identification
+
+    def __repr__(self):
+        return (
+            f"Player(id={self.player_id}, team='{self.team}', x={self.x:.2f}, y={self.y:.2f}, "
+            f"orientation={self.orientation:.2f}, stamina={self.stamina:.2f})"
+        )
+
+class Field:
+    """
+    Represents the Socker game field, including boundaries and goals.
+    """
+    def __init__(
+        self, width: float, height: float, goal_width: float, goal_depth: float
+    ):
+        if not (width > 0 and height > 0 and goal_width > 0 and goal_depth > 0):
+            raise ValueError("All dimensions must be positive.")
+
+        self.width = width
+        self.height = height
+        self.goal_width = goal_width
+        self.goal_depth = goal_depth
+
+        self.goal_left = {
+            "x_min": -goal_depth,
+            "x_max": 0,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+        self.goal_right = {
+            "x_min": width,
+            "x_max": width + goal_depth,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+
+    def __repr__(self):
+        return (
+            f"Field(width={self.width}, height={self.height}, "
+            f"goal_width={self.goal_width}, goal_depth={self.goal_depth})"
+        )
+
+# Update the SockerAgent class with the new perceive method
+class SockerAgent:
+    """
+    A class representing a Socker Agent in the game environment.
+    This agent encapsulates properties, internal state, and methods for interaction.
+    """
+    def __init__(self, team: str, player_id: int):
+        """
+        Initializes a new SockerAgent instance.
+
+        Args:
+            team (str): The team the agent belongs to (e.g., 'blue' or 'red').
+            player_id (int): A unique identifier for the player within their team.
+        """
+        self.team = team
+        self.player_id = player_id
+        self.perceived_state = {} # To store the latest perceived state
+
+    def __repr__(self):
+        return f"SockerAgent(team='{self.team}', player_id={self.player_id})"
+
+    def perceive(self, ball: Ball, players: list[Player], field: Field) -> dict:
+        """
+        Simulates the agent's sensors, perceiving the current game environment state.
+
+        Args:
+            ball (Ball): The current state of the ball.
+            players (list[Player]): A list of all players in the game.
+            field (Field): The game field's properties.
+
+        Returns:
+            dict: A dictionary containing all perceived information.
+        """
+        self_player_info = None
+        teammates_info = []
+        opponents_info = []
+
+        for player in players:
+            if player.team == self.team and player.player_id == self.player_id:
+                self_player_info = {
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                }
+            elif player.team == self.team:
+                teammates_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+            else:
+                opponents_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+
+        self.perceived_state = {
+            'ball': {
+                'x': ball.x,
+                'y': ball.y,
+                'vx': ball.vx,
+                'vy': ball.vy
+            },
+            'self_player': self_player_info,
+            'teammates': teammates_info,
+            'opponents': opponents_info,
+            'field': {
+                'width': field.width,
+                'height': field.height,
+                'goal_left': field.goal_left,
+                'goal_right': field.goal_right
+            }
+        }
+        return self.perceived_state
+
+    def decide_action(self) -> dict:
+        """
+        Processes the perceived state and decides on an action based on simple rules.
+
+        Returns:
+            dict: A dictionary representing the chosen action and its parameters.
+        """
+        if not self.perceived_state:
+            return {'action_type': 'idle', 'reason': 'No perceived state'}
+
+        ball_info = self.perceived_state['ball']
+        self_info = self.perceived_state['self_player']
+        # teammates = self.perceived_state['teammates'] # Not used directly in current logic
+        opponents = self.perceived_state['opponents']
+        field_info = self.perceived_state['field']
+
+        # Helper function to calculate distance
+        def distance(p1_x, p1_y, p2_x, p2_y):
+            return math.sqrt((p1_x - p2_x)**2 + (p1_y - p2_y)**2)
+
+        # 1. Prioritize Ball: Is this agent the closest player to the ball?
+        self_ball_dist = distance(self_info['x'], self_info['y'], ball_info['x'], ball_info['y'])
+
+        is_closest_to_ball = True
+        all_other_players = [p for p in self.perceived_state['teammates'] if p['id'] != self.player_id] + opponents
+
+        for player in all_other_players:
+            player_ball_dist = distance(player['x'], player['y'], ball_info['x'], ball_info['y'])
+            if player_ball_dist < self_ball_dist:
+                is_closest_to_ball = False
+                break
+
+        if is_closest_to_ball:
+            # Move to kick it towards the opponent's goal or pass
+            # For simplicity, let's assume always try to kick towards goal for now
+            # Assuming opponent's goal is on the right for 'blue' team, left for 'red'
+            target_goal_x = field_info['width'] if self.team == 'blue' else 0
+            target_goal_y = field_info['height'] / 2
+
+            # Calculate direction to target goal
+            dx = target_goal_x - self_info['x']
+            dy = target_goal_y - self_info['y']
+            direction_to_goal = math.atan2(dy, dx)
+
+            # If very close to ball, try to kick. Otherwise, move towards ball.
+            if self_ball_dist < 1.5: # Arbitrary small distance for kicking range
+                return {'action_type': 'kick', 'power': 0.8, 'direction': direction_to_goal, 'reason': 'Closest to ball, kicking towards goal'}
+            else:
+                # Move towards the ball
+                return {'action_type': 'move', 'target_x': ball_info['x'], 'target_y': ball_info['y'], 'reason': 'Closest to ball, moving to possess'}
+        else:
+            # Not closest to ball, consider defensive or offensive positioning
+            has_ball_possession_by_teammate = False
+            for player in self.perceived_state['teammates']:
+                if distance(player['x'], player['y'], ball_info['x'], ball_info['y']) < 2.0: # Arbitrary possession range
+                    has_ball_possession_by_teammate = True
+                    break
+
+            if not has_ball_possession_by_teammate: # Defensive Positioning (or chasing opponents with ball)
+                # Move towards own goal area or intercept opponent with ball
+                own_goal_center_x = 0 if self.team == 'blue' else field_info['width']
+                own_goal_center_y = field_info['height'] / 2
+
+                # Simple defensive position: move towards own goal center
+                return {'action_type': 'move', 'target_x': own_goal_center_x + (5 if self.team == 'blue' else -5), 'target_y': own_goal_center_y, 'reason': 'Defensive positioning'}
+            else: # Offensive Positioning (team has possession, but not this agent)
+                # Move towards opponent's goal or support teammate with ball
+                opponent_goal_center_x = field_info['width'] if self.team == 'blue' else 0
+                opponent_goal_center_y = field_info['height'] / 2
+
+                # Simple offensive position: move towards opponent's goal, but not too close yet
+                return {'action_type': 'move', 'target_x': opponent_goal_center_x - (10 if self.team == 'blue' else -10), 'target_y': opponent_goal_center_y, 'reason': 'Offensive positioning, supporting attack'}
+
+    def move_to_position(self, target_x: float, target_y: float):
+        """
+        Simulates the agent moving to a specific target position.
+        In a real game, this would update the agent's x, y coordinates.
+        """
+        print(f"Agent {self.player_id} ({self.team}) moving to ({target_x:.2f}, {target_y:.2f}).")
+
+    def kick_ball(self, power: float, direction: float):
+        """
+        Simulates the agent kicking the ball.
+        In a real game, this would influence the ball's velocity and direction.
+        """
+        print(f"Agent {self.player_id} ({self.team}) kicking ball with power {power:.2f} in direction {math.degrees(direction):.2f} degrees.")
+
+    def idle(self):
+        """
+        Simulates the agent performing an idle action.
+        """
+        print(f"Agent {self.player_id} ({self.team}) is idle.")
+
+print("SockerAgent class updated with actuator methods (move_to_position, kick_ball, idle).")
+
+# Example usage to verify
+field = Field(width=100, height=60, goal_width=10, goal_depth=5)
+ball = Ball(x=50, y=30, vx=1, vy=0.5)
+player1 = Player(x=48, y=30, orientation=0.5, team='blue', stamina=0.9, player_id=1) # Closest to ball
+player2 = Player(x=15, y=25, orientation=1.0, team='blue', stamina=0.8, player_id=2)
+player3 = Player(x=90, y=40, orientation=-0.5, team='red', stamina=0.7, player_id=1)
+players_list = [player1, player2, player3]
+
+agent = SockerAgent(team='blue', player_id=1)
+agent.perceive(ball, players_list, field)
+action = agent.decide_action()
+print(f"\nAgent 1 (blue) decided action: {action}")
+if action['action_type'] == 'move':
+    agent.move_to_position(action['target_x'], action['target_y'])
+elif action['action_type'] == 'kick':
+    agent.kick_ball(action['power'], action['direction'])
+else:
+    agent.idle()
+
+agent2 = SockerAgent(team='blue', player_id=2)
+agent2.perceive(ball, players_list, field)
+action2 = agent2.decide_action()
+print(f"\nAgent 2 (blue) decided action: {action2}")
+if action2['action_type'] == 'move':
+    agent2.move_to_position(action2['target_x'], action2['target_y'])
+elif action2['action_type'] == 'kick':
+    agent2.kick_ball(action2['power'], action2['direction'])
+else:
+    agent2.idle()
+
+agent3 = SockerAgent(team='red', player_id=1)
+agent3.perceive(ball, players_list, field)
+action3 = agent3.decide_action()
+print(f"\nAgent 3 (red) decided action: {action3}")
+if action3['action_type'] == 'move':
+    agent3.move_to_position(action3['target_x'], action3['target_y'])
+elif action3['action_type'] == 'kick':
+    agent3.kick_ball(action3['power'], action3['direction'])
+else:
+    agent3.idle()
+import math
+import time
+
+# Re-define Ball, Player, and Field classes as they are dependencies
+class Ball:
+    """
+    Represents the Socker ball with its position and velocity.
+    """
+    def __init__(self, x: float, y: float, vx: float = 0.0, vy: float = 0.0):
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+    def __repr__(self):
+        return f"Ball(x={self.x:.2f}, y={self.y:.2f}, vx={self.vx:.2f}, vy={self.vy:.2f})"
+
+class Player:
+    """
+    Represents a player in the Socker game.
+    """
+    def __init__(self, x: float, y: float, orientation: float, team: str, stamina: float, player_id: int):
+        if not (-math.pi <= orientation <= math.pi):
+            raise ValueError("Orientation must be in radians between -pi and pi.")
+        if not (0.0 <= stamina <= 1.0):
+            raise ValueError("Stamina must be between 0.0 and 1.0.")
+
+        self.x = x
+        self.y = y
+        self.orientation = orientation  # in radians
+        self.team = team
+        self.stamina = stamina
+        self.player_id = player_id # Added player_id to Player class for identification
+
+    def __repr__(self):
+        return (
+            f"Player(id={self.player_id}, team='{self.team}', x={self.x:.2f}, y={self.y:.2f}, "
+            f"orientation={self.orientation:.2f}, stamina={self.stamina:.2f})"
+        )
+
+class Field:
+    """
+    Represents the Socker game field, including boundaries and goals.
+    """
+    def __init__(
+        self, width: float, height: float, goal_width: float, goal_depth: float
+    ):
+        if not (width > 0 and height > 0 and goal_width > 0 and goal_depth > 0):
+            raise ValueError("All dimensions must be positive.")
+
+        self.width = width
+        self.height = height
+        self.goal_width = goal_width
+        self.goal_depth = goal_depth
+
+        self.goal_left = {
+            "x_min": -goal_depth,
+            "x_max": 0,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+        self.goal_right = {
+            "x_min": width,
+            "x_max": width + goal_depth,
+            "y_min": (height - goal_width) / 2,
+            "y_max": (height + goal_width) / 2,
+        }
+
+    def __repr__(self):
+        return (
+            f"Field(width={self.width}, height={self.height}, "
+            f"goal_width={self.goal_width}, goal_depth={self.goal_depth})"
+        )
+
+# Update the SockerAgent class with the new perceive method
+class SockerAgent:
+    """
+    A class representing a Socker Agent in the game environment.
+    This agent encapsulates properties, internal state, and methods for interaction.
+    """
+    def __init__(self, team: str, player_id: int):
+        """
+        Initializes a new SockerAgent instance.
+
+        Args:
+            team (str): The team the agent belongs to (e.g., 'blue' or 'red').
+            player_id (int): A unique identifier for the player within their team.
+        """
+        self.team = team
+        self.player_id = player_id
+        self.perceived_state = {} # To store the latest perceived state
+
+    def __repr__(self):
+        return f"SockerAgent(team='{self.team}', player_id={self.player_id})"
+
+    def perceive(self, ball: Ball, players: list[Player], field: Field) -> dict:
+        """
+        Simulates the agent's sensors, perceiving the current game environment state.
+
+        Args:
+            ball (Ball): The current state of the ball.
+            players (list[Player]): A list of all players in the game.
+            field (Field): The game field's properties.
+
+        Returns:
+            dict: A dictionary containing all perceived information.
+        """
+        self_player_info = None
+        teammates_info = []
+        opponents_info = []
+
+        for player in players:
+            if player.team == self.team and player.player_id == self.player_id:
+                self_player_info = {
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                }
+            elif player.team == self.team:
+                teammates_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+            else:
+                opponents_info.append({
+                    'id': player.player_id,
+                    'x': player.x,
+                    'y': player.y,
+                    'orientation': player.orientation,
+                    'stamina': player.stamina
+                })
+
+        self.perceived_state = {
+            'ball': {
+                'x': ball.x,
+                'y': ball.y,
+                'vx': ball.vx,
+                'vy': ball.vy
+            },
+            'self_player': self_player_info,
+            'teammates': teammates_info,
+            'opponents': opponents_info,
+            'field': {
+                'width': field.width,
+                'height': field.height,
+                'goal_left': field.goal_left,
+                'goal_right': field.goal_right
+            }
+        }
+        return self.perceived_state
+
+    def decide_action(self) -> dict:
+        """
+        Processes the perceived state and decides on an action based on simple rules.
+
+        Returns:
+            dict: A dictionary representing the chosen action and its parameters.
+        """
+        if not self.perceived_state or self.perceived_state['self_player'] is None:
+            return {'action_type': 'idle', 'reason': 'No perceived state or self_player info'}
+
+        ball_info = self.perceived_state['ball']
+        self_info = self.perceived_state['self_player']
+        # teammates = self.perceived_state['teammates'] # Not used directly in current logic
+        opponents = self.perceived_state['opponents']
+        field_info = self.perceived_state['field']
+
+        # Helper function to calculate distance
+        def distance(p1_x, p1_y, p2_x, p2_y):
+            return math.sqrt((p1_x - p2_x)**2 + (p1_y - p2_y)**2)
+
+        # 1. Prioritize Ball: Is this agent the closest player to the ball?
+        self_ball_dist = distance(self_info['x'], self_info['y'], ball_info['x'], ball_info['y'])
+
+        is_closest_to_ball = True
+        all_other_players = [p for p in self.perceived_state['teammates'] if p['id'] != self.player_id] + opponents
+
+        for player in all_other_players:
+            player_ball_dist = distance(player['x'], player['y'], ball_info['x'], ball_info['y'])
+            if player_ball_dist < self_ball_dist:
+                is_closest_to_ball = False
+                break
+
+        if is_closest_to_ball:
+            # Move to kick it towards the opponent's goal or pass
+            # For simplicity, let's assume always try to kick towards goal for now
+            # Assuming opponent's goal is on the right for 'blue' team, left for 'red'
+            target_goal_x = field_info['width'] if self.team == 'blue' else 0
+            target_goal_y = field_info['height'] / 2
+
+            # Calculate direction to target goal
+            dx = target_goal_x - self_info['x']
+            dy = target_goal_y - self_info['y']
+            direction_to_goal = math.atan2(dy, dx)
+
+            # If very close to ball, try to kick. Otherwise, move towards ball.
+            if self_ball_dist < 1.5: # Arbitrary small distance for kicking range
+                return {'action_type': 'kick', 'power': 0.8, 'direction': direction_to_goal, 'reason': 'Closest to ball, kicking towards goal'}
+            else:
+                # Move towards the ball
+                return {'action_type': 'move', 'target_x': ball_info['x'], 'target_y': ball_info['y'], 'reason': 'Closest to ball, moving to possess'}
+        else:
+            # Not closest to ball, consider defensive or offensive positioning
+            has_ball_possession_by_teammate = False
+            for player in self.perceived_state['teammates']:
+                if distance(player['x'], player['y'], ball_info['x'], ball_info['y']) < 2.0: # Arbitrary possession range
+                    has_ball_possession_by_teammate = True
+                    break
+
+            if not has_ball_possession_by_teammate: # Defensive Positioning (or chasing opponents with ball)
+                # Move towards own goal area or intercept opponent with ball
+                own_goal_center_x = 0 if self.team == 'blue' else field_info['width']
+                own_goal_center_y = field_info['height'] / 2
+
+                # Simple defensive position: move towards own goal center
+                return {'action_type': 'move', 'target_x': own_goal_center_x + (5 if self.team == 'blue' else -5), 'target_y': own_goal_center_y, 'reason': 'Defensive positioning'}
+            else: # Offensive Positioning (team has possession, but not this agent)
+                # Move towards opponent's goal or support teammate with ball
+                opponent_goal_center_x = field_info['width'] if self.team == 'blue' else 0
+                opponent_goal_center_y = field_info['height'] / 2
+
+                # Simple offensive position: move towards opponent's goal, but not too close yet
+                return {'action_type': 'move', 'target_x': opponent_goal_center_x - (10 if self.team == 'blue' else -10), 'target_y': opponent_goal_center_y, 'reason': 'Offensive positioning, supporting attack'}
+
+    def move_to_position(self, target_x: float, target_y: float):
+        """
+        Simulates the agent moving to a specific target position.
+        In a real game, this would update the agent's x, y coordinates.
+        """
+        print(f"Agent {self.player_id} ({self.team}) moving to ({target_x:.2f}, {target_y:.2f}).")
+
+    def kick_ball(self, power: float, direction: float):
+        """
+        Simulates the agent kicking the ball.
+        In a real game, this would influence the ball's velocity and direction.
+        """
+        print(f"Agent {self.player_id} ({self.team}) kicking ball with power {power:.2f} in direction {math.degrees(direction):.2f} degrees.")
+
+    def idle(self):
+        """
+        Simulates the agent performing an idle action.
+        """
+        print(f"Agent {self.player_id} ({self.team}) is idle.")
+
+
+def run_game_loop(
+    agents: list[SockerAgent],
+    ball: Ball,
+    players: list[Player],
+    field: Field,
+    num_steps: int,
+    verbose: bool = True
+):
+    """
+    Runs a simplified game loop to demonstrate the PEAS agent's cycle.
+
+    Args:
+        agents (list[SockerAgent]): A list of SockerAgent instances.
+        ball (Ball): The game ball object.
+        players (list[Player]): A list of all Player objects in the game.
+        field (Field): The game field object.
+        num_steps (int): The number of game iterations to run.
+        verbose (bool): If True, print detailed actions for each step.
+    """
+    print("\n--- Starting Socker Game Loop ---")
+    print(f"Initial State: {ball}, Players: {[p.__repr__() for p in players]}")
+
+    for step in range(num_steps):
+        print(f"\n=== Game Step {step + 1}/{num_steps} ===")
+
+        # 1. Simulate Environment Update (simple for demonstration)
+        # For this example, we'll just slightly move the ball and update player positions
+        # based on their last actions (not implemented yet, so just print current state)
+        ball.x += ball.vx * 0.1 # Small movement increment
+        ball.y += ball.vy * 0.1
+        if verbose:
+            print(f"Environment Update: Ball is now at ({ball.x:.2f}, {ball.y:.2f})")
+
+        # Update player positions based on potential previous move actions (simplified)
+        # In a full simulation, this would be handled by a game engine
+        updated_players = []
+        for p in players:
+            # Find the corresponding SockerAgent to check for its perceived state/last action
+            # This is a simplification; a real game engine would manage player movement directly.
+            agent_found = next((a for a in agents if a.player_id == p.player_id and a.team == p.team), None)
+            if agent_found and agent_found.perceived_state and agent_found.perceived_state['self_player']:
+                # For now, just copy the perceived position to simulate movement
+                # A more complex simulation would apply forces/velocities
+                current_player_info = agent_found.perceived_state['self_player']
+                p.x = current_player_info['x']
+                p.y = current_player_info['y']
+            updated_players.append(p)
+        players = updated_players # Update the shared player list
+
+        # 2. & 3. & 4. Sense -> Think -> Act for each agent
+        for agent in agents:
+            if verbose:
+                print(f"\nAgent {agent.player_id} ({agent.team}) Turn:")
+
+            # Sense
+            perceived_info = agent.perceive(ball, players, field)
+            if verbose:
+                # Print less verbose perceived info to avoid clutter
+                print(f"  Perceived ball at ({perceived_info['ball']['x']:.2f}, {perceived_info['ball']['y']:.2f})")
+                print(f"  Perceived self at ({perceived_info['self_player']['x']:.2f}, {perceived_info['self_player']['y']:.2f})")
+
+            # Think
+            action = agent.decide_action()
+            if verbose:
+                print(f"  Decided action: {action['action_type']} (Reason: {action.get('reason', 'N/A')})")
+
+            # Act
+            if action['action_type'] == 'move':
+                agent.move_to_position(action['target_x'], action['target_y'])
+                # Update the player's actual position in the 'players' list for the next iteration
+                for p in players:
+                    if p.player_id == agent.player_id and p.team == agent.team:
+                        p.x = action['target_x']
+                        p.y = action['target_y']
+                        break
+            elif action['action_type'] == 'kick':
+                agent.kick_ball(action['power'], action['direction'])
+                # Simulate ball movement after kick (very simplified)
+                ball.vx += math.cos(action['direction']) * action['power'] * 0.5
+                ball.vy += math.sin(action['direction']) * action['power'] * 0.5
+            else:
+                agent.idle()
+
+        # Small delay to simulate real-time progress for readability
+        time.sleep(0.1)
+
+    print("\n--- Socker Game Loop Finished ---")
+    print(f"Final State: {ball}, Players: {[p.__repr__() for p in players]}")
+
+
+# --- Set up initial game state ---
+field = Field(width=100, height=60, goal_width=10, goal_depth=5)
+ball = Ball(x=50, y=30, vx=0.0, vy=0.0) # Start ball in center, no velocity
+
+# Player instances (managed by the game loop, not directly by SockerAgent instances)
+player_blue1 = Player(x=20, y=30, orientation=0.0, team='blue', stamina=0.9, player_id=1)
+player_blue2 = Player(x=40, y=45, orientation=0.0, team='blue', stamina=0.8, player_id=2)
+player_red1 = Player(x=80, y=30, orientation=math.pi, team='red', stamina=0.9, player_id=1)
+player_red2 = Player(x=60, y=15, orientation=math.pi, team='red', stamina=0.8, player_id=2)
+
+all_players = [player_blue1, player_blue2, player_red1, player_red2]
+
+# SockerAgent instances (the "brains")
+agent_blue1 = SockerAgent(team='blue', player_id=1)
+agent_blue2 = SockerAgent(team='blue', player_id=2)
+agent_red1 = SockerAgent(team='red', player_id=1)
+agent_red2 = SockerAgent(team='red', player_id=2)
+
+all_agents = [agent_blue1, agent_blue2, agent_red1, agent_red2]
+
+# --- Run the game loop ---
+# The 'players' list passed to run_game_loop will be updated within the loop
+run_game_loop(all_agents, ball, all_players, field, num_steps=5, verbose=True)
+
